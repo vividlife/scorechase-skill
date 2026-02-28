@@ -1,28 +1,52 @@
 ---
 name: scorechase
-description: 中式台球追分记录技能，用于记录和管理四名玩家之间的台球比赛得分。支持记录大金/小金/黄金 9/黑金/普胜/犯规等事件，查询统计数据和比赛历史。触发场景包括：记录比赛得分、查询玩家排名、查看比赛历史、删除错误记录。
+description: 中式台球追分记录技能，用于记录和管理四名玩家之间的台球比赛得分。支持自然语言输入（如"司庆大金"）、快捷命令（dajin/xiaojin/heijin 等）、查询统计数据和比赛历史。触发场景包括：记录比赛得分、查询玩家排名、查看比赛历史、删除错误记录。
 ---
 
 # Scorechase - 中式台球追分记录技能
 
 ## 快速开始
 
-记录一局比赛：
+以下命令需在 **scorechase 项目的 cli 目录** 下执行（`cd <scorechase>/cli`），或从本技能仓库用 `./scripts/scorechase-exec.sh <子命令> ...` 转发。
+
+### 方式 1：自然语言命令（最直观，推荐）
+
 ```bash
-# 在 scorechase 主项目旁克隆本技能仓库时，从技能仓库执行：
-./scripts/scorechase-exec.sh record -e <事件类型> -s <击球座次> [--foul <犯规座次>]
-# 或进入 scorechase/cli 后：./scorechase record -e <事件> -s <座次> ...
+./scorechase record-nlp "司庆大金"
+./scorechase record-nlp "小孙小金"
+./scorechase record-nlp "泰坦黄金 9"
+./scorechase record-nlp "荣升黑金"
+./scorechase record-nlp "司庆普胜"
+./scorechase record-nlp "小孙普胜 1 号犯规"
+```
+
+### 方式 2：快捷命令（简洁）
+
+```bash
+./scorechase dajin             # 大金（自动 1 号位）
+./scorechase xiaojin -s 2      # 2 号位小金
+./scorechase huangjin9         # 黄金 9（自动 1 号位）
+./scorechase heijin -s 3       # 3 号位黑金
+./scorechase pusheng -s 4      # 4 号位普胜
+```
+
+### 方式 3：完整参数控制
+
+```bash
+./scorechase record -e <事件类型> -s <击球座次> [--foul <犯规座次>]
 ```
 
 ## 工作流程
 
 ### 1. 记录比赛得分
 
-**步骤：**
-1. 确定事件类型（dajin|xiaojin|huangjin9|heijin|pusheng）
-2. 确定击球座次（1-4 号位）
-3. 可选：记录犯规座次
-4. 执行命令并验证结果
+**三种方式：**
+
+| 方式 | 命令 | 适用场景 |
+|------|------|----------|
+| 自然语言 | `record-nlp "司庆大金"` | AI Agent 操控，最直观 |
+| 快捷命令 | `dajin` / `xiaojin -s 2` | 快速记录 |
+| 完整参数 | `record -e dajin -s 1` | 精确控制 |
 
 **事件类型说明：**
 - `dajin` - 大金（+30/-10/-10/-10）→ 自动选择 1 号位
@@ -31,25 +55,36 @@ description: 中式台球追分记录技能，用于记录和管理四名玩家�
 - `heijin` - 黑金（-12/+4/+4/+4）
 - `pusheng` - 普胜（+4/-4/0/0）
 
+**自然语言识别：**
+- 玩家名称 + 事件：`"司庆大金"`、`"小孙小金"`、`"司庆普胜"`（只需指定赢家，输家自动为上家）
+- 座次 + 事件：`"1 号黄金 9"`、`"2 号黑金"`
+- 带犯规：`"小孙普胜 1 号犯规"`、`"泰坦黑金 2 号 3 号犯规"`
+
 **示例：**
 ```bash
-# 大金（1 号位自动选择）
-./scripts/scorechase-exec.sh record -e dajin -s 1
+# 自然语言方式
+./scorechase record-nlp "司庆大金"
+./scorechase record-nlp "小孙小金"
+./scorechase record-nlp "泰坦黄金 9"
+./scorechase record-nlp "荣升黑金"
+./scorechase record-nlp "司庆普胜"
 
-# 小金（3 号位击球）
-./scripts/scorechase-exec.sh record -e xiaojin -s 3
+# 快捷命令
+./scorechase dajin
+./scorechase xiaojin -s 2
+./scorechase huangjin9
+./scorechase heijin -s 3
+./scorechase pusheng -s 4
 
-# 普胜 + 犯规（2 号位普胜，1 号位犯规）
-./scripts/scorechase-exec.sh record -e pusheng -s 2 --foul 1
-
-# 多人犯规
-./scripts/scorechase-exec.sh record -e pusheng -s 3 --foul 1 --foul 2
+# 带犯规
+./scorechase record-nlp "小孙普胜 1 号犯规"
+./scorechase record -e pusheng -s 2 --foul 1
 ```
 
 ### 2. 查询统计数据
 
 ```bash
-./scripts/scorechase-exec.sh stats
+./scorechase stats
 ```
 
 输出包含：排名、姓名、总分、胜/败场数、胜率、大金/小金/黄金 9/黑金/犯规次数。
@@ -57,23 +92,23 @@ description: 中式台球追分记录技能，用于记录和管理四名玩家�
 ### 3. 查询比赛记录
 
 ```bash
-./scripts/scorechase-exec.sh matches          # 所有比赛
-./scripts/scorechase-exec.sh matches -l 10    # 最近 10 场
-./scripts/scorechase-exec.sh match <matchId>  # 单场详情
+./scorechase matches          # 所有比赛
+./scorechase matches -l 10    # 最近 10 场
+./scorechase match <matchId>  # 单场详情
 ```
 
 ### 4. 管理玩家
 
 ```bash
-./scripts/scorechase-exec.sh players           # 玩家列表
-./scripts/scorechase-exec.sh player "司庆"     # 查找玩家
-./scripts/scorechase-exec.sh add-player "新玩家"  # 添加玩家
+./scorechase players           # 玩家列表
+./scorechase player "司庆"     # 查找玩家
+./scorechase add-player "新玩家"  # 添加玩家
 ```
 
 ### 5. 删除比赛记录
 
 ```bash
-./scripts/scorechase-exec.sh delete-match <matchId>
+./scorechase delete-match <matchId>
 ```
 
 ## 座次关系

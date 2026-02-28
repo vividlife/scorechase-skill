@@ -4,7 +4,8 @@ Claude Code 技能：中式台球追分记录。用于在对话中通过 AI 记�
 
 ## 内容
 
-- **SKILL.md** - 技能说明与工作流程（记录大金/小金/黄金 9/黑金/普胜/犯规、查询统计与比赛记录）
+- **SKILL.md** - 技能说明与工作流程（自然语言 record-nlp、快捷命令、完整参数 record、查询统计与比赛记录）
+- **INSTALL.md** - 安装与验证说明
 - **scripts/scorechase-exec.sh** - 调用 [Scorechase](https://github.com/vividlife/scorechase) 项目下 CLI 的脚本
 
 ## 安装（Claude）
